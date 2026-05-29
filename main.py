@@ -3,7 +3,7 @@ from data_reader import leer_datos
 from data_validator import validar_demanda
 
 def main():
-    # --------- Carga de Datos ---------
+    #  Carga de Datos 
     (E, S, T, P, C,
      te, Bp, cs, hs, vs, Cape, Maxt, Mint,
      I0, we, Le, As, Us, R0, De, ae, Sc, m_s, M_s) = leer_datos()
@@ -12,10 +12,8 @@ def main():
     idx_p = {p: i for i, p in enumerate(P)}
     p0    = P[0]  # primer periodo
 
-    # --------- Validacion de supuesto de demanda factible ---------
+    #  Validacion de supuesto de demanda factible 
     # Comprueba que De[e,s,p] <= stock maximo acumulable en cada (e,s,p).
-    # Si falla, detiene la ejecucion antes de llamar a Gurobi e indica
-    # exactamente que combinacion (e,s,p) es inconsistente en los datos.
     validar_demanda(E, S, P, I0, De, As, ae, R0)
 
     model = Model()
@@ -23,7 +21,6 @@ def main():
     model.setParam("OutputFlag", 0)
 
     # --------- Variables de decision ---------
-    # ELIMINADAS: d[e,s,p] (ahora es el parametro De) y z[e,s,p] (variable binaria de activacion)
 
     # x[e,s,p]: cantidad comprada del suministro s para la estacion e en el periodo p
     x = model.addVars(E, S, P, vtype=GRB.CONTINUOUS, lb=0, name="x")
@@ -40,7 +37,6 @@ def main():
     R = model.addVars(E, S, P, vtype=GRB.CONTINUOUS, lb=0, name="R")
 
     # --------- Funcion Objetivo ---------
-    # Minimizar el deficit ponderado por criticidad en todas las estaciones y periodos
     obj = quicksum(we[e,s] * u[e,s,p] for e in E for s in S for p in P)
     model.setObjective(obj, GRB.MINIMIZE)
 
@@ -116,9 +112,6 @@ def main():
     )
 
     # (11) Retiro por vida util en periodos iniciales
-    # Cuando el lote que vence aun no existe en el horizonte, el retiro
-    # proviene solo del inventario inicial programado para retiro
-    # CAMBIO: R0 ahora indexado con tres indices (e,s,p)
     model.addConstrs(
         (R[e,s,p] == R0.get((e,s,p), 0)
          for e in E for s in S for p in P
@@ -157,10 +150,10 @@ def main():
         name="compra_minima"
     )
 
-    # --------- Optimizacion ---------
+    # ------- Optimizacion ---------
     model.optimize()
 
-    # --------- Manejo de Soluciones ---------
+    # ------- Manejo de Soluciones -----
     if model.status == GRB.OPTIMAL or model.status == GRB.TIME_LIMIT:
         estado = "OPTIMO" if model.status == GRB.OPTIMAL else "LIMITE DE TIEMPO"
         print("-"*50)
