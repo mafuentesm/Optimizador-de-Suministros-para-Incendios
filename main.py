@@ -18,7 +18,7 @@ def main():
 
     model = Model()
     model.setParam("TimeLimit", 120)
-    model.setParam("OutputFlag", 0)
+    model.setParam("OutputFlag", 1)
 
     # --------- Variables de decision ---------
 
@@ -31,7 +31,7 @@ def main():
     # u[e,s,p]: deficit del suministro s en la estacion e durante el periodo p
     u = model.addVars(E, S, P, vtype=GRB.CONTINUOUS, lb=0, name="u")
 
-    z = model.addVars(E, S, P, vtype=GRB.CONTINUOUS, lb=0, name="z")
+    z = model.addVars(E, S, P, vtype=GRB.BINARY, lb=0, name="z")
 
     # R[e,s,p]: unidades del suministro s retiradas de la estacion e en el periodo p por vida util
     R = model.addVars(E, S, P, vtype=GRB.CONTINUOUS, lb=0, name="R")
