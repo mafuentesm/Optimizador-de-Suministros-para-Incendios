@@ -70,7 +70,7 @@ def main():
     # (5) Inventario minimo con captura de deficit
     # Si el inventario no alcanza el minimo, u[e,s,p] absorbe la brecha
     model.addConstrs(
-        (I[e,s,p] + u[e,s,p] >= Mint[te[e], s]
+        (I[e,s,p] + u[e,s,p] >= Mint[te[e], s] * ae[e,s]
          for e in E for s in S for p in P),
         name="inventario_minimo"
     )
